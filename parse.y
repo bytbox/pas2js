@@ -121,7 +121,7 @@ formal_parameter_list_maybe: | formal_parameter_list
 formal_parameter_list:
 	"(" formal_parameter_section formal_parameter_list1 ")"
 formal_parameter_list1:
-	| ";" formal_parameter_section
+	| ";" formal_parameter_section formal_parameter_list1
 
 formal_parameter_section:
 	value_parameter_section |
