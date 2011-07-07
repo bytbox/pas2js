@@ -49,7 +49,7 @@ e[0-9]+		return SCALE;
 '[^']'		return STRING;
 [ \t]+		/* whitespace */
 \n		/* newline */
-.		fprintf(stderr, "Bad token: %s\n", yytext);
+.		return yytext[0];
 
 %%
 
