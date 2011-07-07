@@ -78,24 +78,16 @@ variable_declaration:
 	identifier_list ":" type
 
 procedure_and_function_declaration_part:
-	| procedure_declaration ";"
-	| function_declaration ";"
+	| procedure_and_function_declaration_part procedure_declaration ";"
+	| procedure_and_function_declaration_part function_declaration ";"
 
 procedure_declaration:
-	procedure_heading ";" procedure_body |
+	procedure_heading ";" block |
 	procedure_heading ";" directive |
-	procedure_identification ";" procedure_body
-
-procedure_body:
-	block
 
 function_declaration:
-	function_heading ";" function_body |
+	function_heading ";" block |
 	function_heading ";" directive |
-	function_identification ";" function_body
-
-function_body:
-	block
 
 directive:
 	FORWARD
@@ -110,12 +102,6 @@ function_heading:
 	FUNCTION identifier formal_parameter_list_maybe ":" result_type
 
 result_type: identifier
-
-procedure_identification:
-	PROCEDURE identifier
-
-function_identification:
-	FUNCTION identifier
 
 formal_parameter_list_maybe: | formal_parameter_list
 formal_parameter_list:
