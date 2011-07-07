@@ -15,7 +15,11 @@
  * beginnings of a separate compilation facility
  */
 
+#define YYSVAL char *
+
 #include <stdio.h>
+
+#include "tree.h"
 
 extern int line_no;
 void yyerror() {
@@ -24,12 +28,18 @@ void yyerror() {
 
 %}
 
-%token AND ARRAY ASSIGNMENT CASE CHARACTER_STRING COLON COMMA CONST DIGSEQ
-%token DIV DO DOT DOTDOT DOWNTO ELSE END EQUAL EXTERNAL FOR FORWARD FUNCTION
-%token GE GOTO GT IDENTIFIER IF IN LABEL LBRAC LE LPAREN LT MINUS MOD NIL NOT
-%token NOTEQUAL OF OR OTHERWISE PACKED PBEGIN PFILE PLUS PROCEDURE PROGRAM RBRAC
-%token REALNUMBER RECORD REPEAT RPAREN SEMICOLON SET SLASH STAR STARSTAR THEN
-%token TO TYPE UNTIL UPARROW VAR WHILE WITH
+%union {
+	char *string;
+}
+
+%type <string> identifier
+
+%token <string> AND ARRAY ASSIGNMENT CASE CHARACTER_STRING COLON COMMA CONST DIGSEQ
+%token <string> DIV DO DOT DOTDOT DOWNTO ELSE END EQUAL EXTERNAL FOR FORWARD FUNCTION
+%token <string> GE GOTO GT IDENTIFIER IF IN LABEL LBRAC LE LPAREN LT MINUS MOD NIL NOT
+%token <string> NOTEQUAL OF OR OTHERWISE PACKED PBEGIN PFILE PLUS PROCEDURE PROGRAM RBRAC
+%token <string> REALNUMBER RECORD REPEAT RPAREN SEMICOLON SET SLASH STAR STARSTAR THEN
+%token <string> TO TYPE UNTIL UPARROW VAR WHILE WITH
 
 %%
 file : program
@@ -39,8 +49,13 @@ file : program
 program : program_heading semicolon block DOT
 	;
 
-program_heading : PROGRAM identifier
-	| PROGRAM identifier LPAREN identifier_list RPAREN
+program_heading :
+	PROGRAM identifier
+	{
+		printf("PROG: %s!\n", $2);
+	}
+	|
+	PROGRAM identifier LPAREN identifier_list RPAREN
 	;
 
 identifier_list : identifier_list comma identifier
@@ -53,7 +68,7 @@ block : label_declaration_part
 	statement_part
 	;
 
-dparts:
+dparts :
 	constant_definition_part
 	type_definition_part
 	variable_declaration_part
@@ -547,10 +562,13 @@ relop : EQUAL
 	;
 
 identifier : IDENTIFIER
-	;
+	{
+		$$ = $1;
+	}
 
 semicolon : SEMICOLON
 	;
 
 comma : COMMA
 	;
+

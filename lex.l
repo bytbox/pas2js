@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include "y.tab.h"
 int line_no = 1;
-
 %}
 
 A	[aA]
@@ -82,34 +81,34 @@ NQUOTE	[^']
 {V}{A}{R}			return(VAR);
 {W}{H}{I}{L}{E}			return(WHILE);
 {W}{I}{T}{H}			return(WITH);
-[_a-zA-Z]([_a-zA-Z0-9])*	return(IDENTIFIER);
+[_a-zA-Z]([_a-zA-Z0-9])*	{yylval.string = strdup(yytext); return(IDENTIFIER);}
 
-":="			return(ASSIGNMENT);
-'({NQUOTE}|'')+'	return(CHARACTER_STRING);
-":"			return(COLON);
-","			return(COMMA);
-[0-9]+			return(DIGSEQ);
-"."			return(DOT);
-".."			return(DOTDOT);
-"="			return(EQUAL);
-">="			return(GE);
-">"			return(GT);
-"["			return(LBRAC);
-"<="			return(LE);
-"("			return(LPAREN);
-"<"			return(LT);
-"-"			return(MINUS);
-"<>"			return(NOTEQUAL);
-"+"			return(PLUS);
-"]"			return(RBRAC);
-[0-9]+("."[0-9]+)?(e-?[0-9]+)? return(REALNUMBER);
-")"			return(RPAREN);
-";"			return(SEMICOLON);
-"/"			return(SLASH);
-"*"			return(STAR);
-"**"			return(STARSTAR);
-"->"			|
-"^"			return(UPARROW);
+":="				return(ASSIGNMENT);
+'({NQUOTE}|'')+'		return(CHARACTER_STRING);
+":"				return(COLON);
+","				return(COMMA);
+[0-9]+				return(DIGSEQ);
+"."				return(DOT);
+".."				return(DOTDOT);
+"="				return(EQUAL);
+">="				return(GE);
+">"				return(GT);
+"["				return(LBRAC);
+"<="				return(LE);
+"("				return(LPAREN);
+"<"				return(LT);
+"-"				return(MINUS);
+"<>"				return(NOTEQUAL);
+"+"				return(PLUS);
+"]"				return(RBRAC);
+[0-9]+("."[0-9]+)?(e-?[0-9]+)?	{yylval.string = strdup(yytext); return(REALNUMBER);}
+")"				return(RPAREN);
+";"				return(SEMICOLON);
+"/"				return(SLASH);
+"*"				return(STAR);
+"**"				return(STARSTAR);
+"->"				|
+"^"				return(UPARROW);
 
 "(*"   |
 "{"    { register int c;
@@ -136,7 +135,7 @@ NQUOTE	[^']
 \n    line_no++;
 
 .    { fprintf (stderr,
-    "'%c' (0%o): illegal charcter at line %d\n",
+    "'%c' (0%o): illegal character at line %d\n",
      yytext[0], yytext[0], line_no);
     }
 
