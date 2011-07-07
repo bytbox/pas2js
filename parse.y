@@ -48,16 +48,18 @@ identifier_list : identifier_list comma identifier
 	;
 
 block : label_declaration_part
-	constant_definition_part
-	type_definition_part
-	variable_declaration_part
+	dparts
 	procedure_and_function_declaration_part
 	statement_part
 	;
 
-module : constant_definition_part
+dparts:
+	constant_definition_part
 	type_definition_part
 	variable_declaration_part
+
+module :
+	dparts
 	procedure_and_function_declaration_part
 	;
 
