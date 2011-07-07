@@ -19,7 +19,7 @@
 
 extern int line_no;
 void yyerror() {
-	fprintf(stderr, "parse error at %d\n", line_no);
+	fprintf(stderr, "parse error at line %d\n", line_no);
 }
 
 %}
