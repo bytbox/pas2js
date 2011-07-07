@@ -17,8 +17,9 @@
 
 #include <stdio.h>
 
+extern int line_no;
 void yyerror() {
-	fprintf(stderr, "parse error!\n");
+	fprintf(stderr, "parse error at %d\n", line_no);
 }
 
 %}
