@@ -15,7 +15,7 @@
  * beginnings of a separate compilation facility
  */
 
-#import <stdio.h>
+#include <stdio.h>
 
 void yyerror() {
 	fprintf(stderr, "parse error!\n");
