@@ -245,13 +245,9 @@ actual_parameter_list0:
 	"," actual_parameter actual_parameter_list0
 
 actual_parameter:
-	actual_value | actual_variable | actual_procedure | actual_function
+	actual_value
 
 actual_value: expression
-
-actual_procedure: identifier
-
-actual_function: identifier
 
 expression:
 	simple_expression
@@ -277,9 +273,7 @@ factor:
 	|
 	NIL
 	|
-	identifier
-	|
-	function_designator
+	function_call
 	|
 	"(" expression ")"
 	|
@@ -317,10 +311,7 @@ element_list0:
 	|
 	"," expression element_list0
 
-function_designator:
-	identifier
-	|
-	identifier actual_parameter_list
+function_call: identifier actual_parameter_list
 
 type: simple_type | structured_type | pointer_type | identifier
 
@@ -406,8 +397,6 @@ referenced_variable: identifier "^"
 record_variable_list: record_variable record_variable_list0
 record_variable_list0: | "," record_variable record_variable_list0
 record_variable: variable
-
-actual_variable: variable
 
 array_variable: variable
 
