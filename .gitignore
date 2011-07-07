@@ -1,0 +1,6 @@
+*.swp
+pas2js
+*.o
+parse.c
+y.output
+y.tab.h
