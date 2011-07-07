@@ -1,4 +1,6 @@
 %{
+#include <stdio.h>
+
 #include "y.tab.h"
 %}
 
@@ -45,8 +47,9 @@ e[0-9]+		return SCALE;
 [0-9]+		return UDS;
 [A-Za-z]	return LETTER;
 '[^']'		return STRING;
+[ \t]+		/* whitespace */
 \n		/* newline */
-.		yyerror("Bad token!");
+.		fprintf(stderr, "Bad token: %s\n", yytext);
 
 %%
 
