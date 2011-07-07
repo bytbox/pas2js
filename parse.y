@@ -15,7 +15,7 @@ int yywrap() {
 %token PROGRAM LABEL CONST TYPE VAR FORWARD TBEGIN TEND PROCEDURE FUNCTION
 %token PACKED ARRAY OF GOTO WHILE DO REPEAT UNTIL TO DOWNTO FOR WITH
 %token IF THEN ELSE CASE NOT NIL OR DIV MOD AND RECORD SET TFILE
-%token LETTER
+%token IDENT
 %token STRING SCALE UDS
 
 %%
@@ -24,10 +24,9 @@ program:
 	program_heading block "."
 
 program_heading:
-	PROGRAM
-	{
-
-	}
+	PROGRAM identifier "(" identifier_list ")" ";"
+	|
+	PROGRAM identifier ";"
 
 block:
 	declaration_part statement_part
@@ -371,12 +370,7 @@ tag_field:
 
 variant: case_label_list ":" "(" field_list ")"
 
-identifier: letter identifier0
-identifier0:
-	|
-	letter identifier0
-	|
-	UDS identifier0
+identifier: IDENT
 
 referenced_variable: identifier "^"
 
@@ -392,7 +386,7 @@ variable_list0: | "," variable variable_list0
 */
 
 identifier_list: identifier identifier_list0
-identifier_list0: | "," identifier identifier_list0
+identifier_list0: | identifier_list0 "," identifier
 
 expression_list: expression expression_list0
 expression_list0: | "," expression expression_list0
@@ -423,8 +417,6 @@ sign:
 	"+"
 	|
 	"-"
-
-letter: LETTER
 
 string: STRING
 
