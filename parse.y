@@ -157,7 +157,7 @@ unpacked_conformant_array_schema:
 	ARRAY "[" bound_specification0 "]" OF conformant_array_schema
 
 bound_specification0: bound_specification bound_specification1
-bound_specification1: | ";" bound_specification bound_specification1
+bound_specification1: | bound_specification1 ";" bound_specification
 bound_specification:
 	identifier ".." identifier ":" ordinal_type_identifier
 
@@ -167,7 +167,7 @@ ordinal_type_identifier:
 statement_sequence:
 	statement statement_sequence1
 statement_sequence1:
-	| ";" statement statement_sequence1
+	| statement_sequence1 ";" statement
 
 statement:
 	statement0 simple_statement
