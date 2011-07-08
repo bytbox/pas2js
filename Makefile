@@ -6,7 +6,7 @@ LDFLAGS = -ll
 
 all: pas2js
 
-pas2js: pas2js.o lex.o parse.o
+pas2js: pas2js.o lex.o parse.o jsout.o
 
 lex.o parse.o: y.tab.h
 y.tab.h: parse.c
