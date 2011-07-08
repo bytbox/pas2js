@@ -584,7 +584,7 @@ unsigned_real : REALNUMBER
 	;
 
 /* functions with no params will be handled by plain identifier */
-function_designator : identifier params
+function_designator : variable_access params
 	;
 
 set_constructor : LBRAC member_designator_list RBRAC
