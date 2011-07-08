@@ -30,9 +30,16 @@ void yyerror() {
 
 %union {
 	char *string;
+	struct program *program;
+	struct program_heading *program_heading;
+	struct block *block;
+	struct identifier *identifier;
 }
 
-%type <string> identifier
+%type <identifier> identifier
+%type <program_heading> program_heading
+%type <block> block
+%type <program> program
 
 %token <string> AND ARRAY ASSIGNMENT CASE CHARACTER_STRING COLON COMMA CONST DIGSEQ
 %token <string> DIV DO DOT DOTDOT DOWNTO ELSE END EQUAL EXTERNAL FOR FORWARD FUNCTION
@@ -43,19 +50,28 @@ void yyerror() {
 
 %%
 file : program
+	{
+		output_js_program($1);
+	}
 	| module
 	;
 
 program : program_heading semicolon block DOT
+	{
+		$$ = mk_program($1, $3);
+	}
 	;
 
 program_heading :
 	PROGRAM identifier
 	{
-		printf("PROG: %s!\n", $2);
+		$$ = mk_program_heading($2);
 	}
 	|
 	PROGRAM identifier LPAREN identifier_list RPAREN
+	{
+
+	}
 	;
 
 identifier_list : identifier_list comma identifier
@@ -66,6 +82,9 @@ block : label_declaration_part
 	dparts
 	procedure_and_function_declaration_part
 	statement_part
+	{
+
+	}
 	;
 
 dparts :
@@ -563,7 +582,7 @@ relop : EQUAL
 
 identifier : IDENTIFIER
 	{
-		$$ = $1;
+		$$ = mkIdentifier($1);
 	}
 
 semicolon : SEMICOLON
