@@ -17,9 +17,39 @@ struct program_heading {
 };
 struct program_heading *mk_program_heading(struct identifier *);
 
-struct block {
+struct constant_definition_part {
 
 };
+
+struct type_definition_part {
+
+};
+
+struct variable_definition_part {
+
+};
+
+struct procedure_and_function_definition_part {
+
+};
+
+struct statement_part {
+
+};
+
+struct block {
+	struct constant_definition_part *consts;
+	struct type_definition_part *types;
+	struct variable_definition_part *vars;
+	struct procedure_and_function_definition_part *funcs;
+	struct statement_part *statements;
+};
+struct block *mk_block(
+	struct constant_definition_part *,
+	struct type_definition_part *,
+	struct variable_definition_part *,
+	struct procedure_and_function_definition_part *,
+	struct statement_part *);
 
 struct program {
 	struct program_heading *heading;
