@@ -7,55 +7,19 @@
  * Parse tree representation
  */
 
-struct identifier {
-	char *name;
-};
-struct identifier *mkIdentifier(char *);
+typedef struct stringmap {
+	void **data;
+	int size;
+	int len;
+} stringmap;
 
-struct program_heading {
-	struct identifier *prog_name;
-};
-struct program_heading *mk_program_heading(struct identifier *);
+stringmap *mk_stringmap(int);
+void sm_add(stringmap *m, char *key, void *data);
+void *sm_get(stringmap *m, char *key);
+void free_stringmap(stringmap *);
 
-struct constant_definition_part {
-
-};
-
-struct type_definition_part {
-
-};
-
-struct variable_definition_part {
-
-};
-
-struct procedure_and_function_definition_part {
-
-};
-
-struct statement_part {
-
-};
-
-struct block {
-	struct constant_definition_part *consts;
-	struct type_definition_part *types;
-	struct variable_definition_part *vars;
-	struct procedure_and_function_definition_part *funcs;
-	struct statement_part *statements;
-};
-struct block *mk_block(
-	struct constant_definition_part *,
-	struct type_definition_part *,
-	struct variable_definition_part *,
-	struct procedure_and_function_definition_part *,
-	struct statement_part *);
-
-struct program {
-	struct program_heading *heading;
-	struct block *body;
-};
-struct program *mk_program(struct program_heading *, struct block *);
+#define MKSM(x, y) stringmap *sm = mk_stringmap(x + 1); sm_add(sm, "_", y);
+#define ADD(x,y) sm_add(sm, x, y)
 
 #endif /* !TREE_H */
 

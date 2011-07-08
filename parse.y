@@ -15,8 +15,6 @@
  * beginnings of a separate compilation facility
  */
 
-#define YYSVAL char *
-
 #include <stdio.h>
 
 #include "tree.h"
@@ -26,11 +24,29 @@ void yyerror() {
 	fprintf(stderr, "parse error at line %d\n", line_no);
 }
 
+#define OP_PLUS 1
+#define OP_MINUS 2
+#define OP_OR 3
+#define OP_STAR 4
+#define OP_SLASH 5
+#define OP_DIV 6
+#define OP_MOD 7
+#define OP_AND 8
+#define OP_EQUAL 9
+#define OP_NOTEQUAL 10
+#define OP_LT 11
+#define OP_GT 12
+#define OP_LE 13
+#define OP_GE 14
+#define OP_IN 15
+
 %}
 
 %union {
 	void *ptr;
+	struct stringmap *sm;
 	char *string;
+	int op;
 /*	struct program *program;
 	struct program_heading *program_heading;
 	struct block *block;
@@ -72,9 +88,10 @@ void yyerror() {
 %type <ptr> case_index case_list_element_list case_list_element otherwisepart
 %type <ptr> control_variable initial_value direction final_value record_variable_list
 %type <ptr> boolean_expression expression simple_expression term factor exponentiation
-%type <ptr> primary unsigned_constant unsigned_number unsigned_integer unsigned_real
+%type <ptr> primary unsigned_constant unsigned_number unsigned_real
 %type <ptr> function_designator set_constructor member_designator_list member_designator
-%type <ptr> addop mulop relop identifier semicolon comma 
+%type <ptr> identifier semicolon comma 
+%type <op> addop mulop relop
 
 %token <ptr> AND ARRAY ASSIGNMENT CASE CHARACTER_STRING COLON COMMA CONST DIGSEQ
 %token <ptr> DIV DO DOT DOTDOT DOWNTO ELSE END EQUAL EXTERNAL FOR FORWARD FUNCTION
@@ -85,26 +102,16 @@ void yyerror() {
 
 %%
 file : program
-	{
-		output_js_program($1);
-	}
 	| module
 	;
 
 program : program_heading semicolon block DOT
-	{
-		$$ = mk_program($1, $3);
-	}
 	;
 
 program_heading :
 	PROGRAM identifier
-	{
-		$$ = mk_program_heading($2);
-	}
 	|
 	PROGRAM identifier LPAREN identifier_list RPAREN
-	{}
 	;
 
 identifier_list : identifier_list comma identifier
@@ -115,9 +122,6 @@ block : label_declaration_part
 	dparts
 	procedure_and_function_declaration_part
 	statement_part
-	{
-
-	}
 	;
 
 dparts :
@@ -131,7 +135,7 @@ module :
 	;
 
 label_declaration_part : LABEL label_list semicolon
-	|
+	| {$$ = NULL;}
 	;
 
 label_list : label_list comma label
@@ -142,7 +146,7 @@ label : DIGSEQ
 	;
 
 constant_definition_part : CONST constant_list
-	|
+	| {$$ = NULL;}
 	;
 
 constant_list : constant_list constant_definition
@@ -195,7 +199,7 @@ non_string : DIGSEQ
 	;
 
 type_definition_part : TYPE type_definition_list
-	|
+	| {$$ = NULL;}
 	;
 
 type_definition_list : type_definition_list type_definition
@@ -263,7 +267,7 @@ record_section : identifier_list COLON type_denoter
 
 variant_part : CASE variant_selector OF variant_list semicolon
 	| CASE variant_selector OF variant_list
-	|
+	| {$$ = NULL;}
 	;
 
 variant_selector : tag_field COLON tag_type
@@ -306,7 +310,7 @@ new_pointer_type : UPARROW domain_type
 domain_type : identifier ;
 
 variable_declaration_part : VAR variable_declaration_list semicolon
-	|
+	| {$$ = NULL;}
 	;
 
 variable_declaration_list :
@@ -319,7 +323,7 @@ variable_declaration : identifier_list COLON type_denoter
 
 procedure_and_function_declaration_part :
 	 proc_or_func_declaration_list semicolon
-	|
+	| {$$ = NULL;}
 	;
 
 proc_or_func_declaration_list :
@@ -415,6 +419,7 @@ non_labeled_closed_statement : assignment_statement
 	| closed_while_statement
 	| closed_for_statement
 	|
+	{ $$ = NULL; }
 	;
 
 non_labeled_open_statement : open_with_statement
@@ -475,8 +480,8 @@ index_expression : expression ;
 field_designator : variable_access DOT identifier
 	;
 
-procedure_statement : identifier params
-	| identifier
+procedure_statement : variable_access params
+	| variable_access
 	;
 
 params : LPAREN actual_parameter_list RPAREN ;
@@ -568,12 +573,14 @@ unsigned_constant : unsigned_number
 	| NIL
 	;
 
-unsigned_number : unsigned_integer | unsigned_real ;
-
-unsigned_integer : DIGSEQ
-	;
+unsigned_number : unsigned_real ;
 
 unsigned_real : REALNUMBER
+	{
+		MKSM(1, "num");
+		ADD("value", $1);
+		$$ = sm;
+	}
 	;
 
 /* functions with no params will be handled by plain identifier */
@@ -592,35 +599,37 @@ member_designator : member_designator DOTDOT expression
 	| expression
 	;
 
-addop: PLUS
-	| MINUS
-	| OR
+addop: PLUS {$$ = OP_PLUS;}
+	| MINUS {$$ = OP_MINUS;}
+	| OR {$$ = OP_OR;}
 	;
 
-mulop : STAR
-	| SLASH
-	| DIV
-	| MOD
-	| AND
+mulop : STAR {$$ = OP_STAR;}
+	| SLASH {$$ = OP_SLASH;}
+	| DIV {$$ = OP_DIV;}
+	| MOD {$$ = OP_MOD;}
+	| AND {$$ = OP_AND;}
 	;
 
-relop : EQUAL
-	| NOTEQUAL
-	| LT
-	| GT
-	| LE
-	| GE
-	| IN
+relop : EQUAL {$$ = OP_EQUAL;}
+	| NOTEQUAL {$$ = OP_NOTEQUAL;}
+	| LT {$$ = OP_LT;}
+	| GT {$$ = OP_GT;}
+	| LE {$$ = OP_LE;}
+	| GE {$$ = OP_GE;}
+	| IN {$$ = OP_IN;}
 	;
 
 identifier : IDENTIFIER
 	{
-		$$ = mkIdentifier($1);
+		MKSM(1, "ident");
+		ADD("name", $1);
+		$$ = sm;
 	}
 
-semicolon : SEMICOLON
+semicolon : SEMICOLON { $$ = NULL; }
 	;
 
-comma : COMMA
+comma : COMMA { $$ = NULL; }
 	;
 
