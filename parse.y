@@ -747,7 +747,7 @@ indexed_variable : variable_access LBRAC index_expression_list RBRAC
 index_expression_list : index_expression_list comma index_expression
 	{
 		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+3);
-		sprintf(str, "%s, %s", $1, $3);
+		sprintf(str, "%s][%s", $1, $3);
 		$$ = str;
 	}
 	| index_expression
