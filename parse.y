@@ -161,7 +161,7 @@ block : label_declaration_part
 	statement_part
 	{
 		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+strlen($4)+10);
-		sprintf(str, "%s\n%s\n%s\n%s\n", $1, $2, $3, $4);
+		sprintf(str, "%s%s%s%s", $1, $2, $3, $4);
 		$$ = str;
 	}
 	;
@@ -172,7 +172,7 @@ dparts :
 	variable_declaration_part
 	{
 		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+10);
-		sprintf(str, "%s\n%s\n%s\n", $1, $2, $3);
+		sprintf(str, "%s%s%s", $1, $2, $3);
 		$$ = str;
 	}
 	;
