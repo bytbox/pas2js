@@ -126,6 +126,11 @@ file : program
 	;
 
 program : program_heading semicolon block DOT
+	{
+		char *str = malloc(strlen($1) + strlen($3)+50);
+		sprintf(str, "%s%s", $1, $3);
+		$$ = str;
+	}
 	;
 
 program_heading :
@@ -154,10 +159,10 @@ block : label_declaration_part
 	dparts
 	procedure_and_function_declaration_part
 	statement_part
-	{/*
+	{
 		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+strlen($4)+10);
 		sprintf(str, "%s\n%s\n%s\n%s\n", $1, $2, $3, $4);
-		$$ = str; */
+		$$ = str;
 	}
 	;
 
@@ -166,9 +171,9 @@ dparts :
 	type_definition_part
 	variable_declaration_part
 	{
-		/*char *str = malloc(strlen($1)+strlen($2)+strlen($3)+10);
+		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+10);
 		sprintf(str, "%s\n%s\n%s\n", $1, $2, $3);
-		$$ = str;*/
+		$$ = str;
 	}
 	;
 
@@ -318,7 +323,7 @@ type_definition_list : type_definition_list type_definition
 type_definition : identifier EQUAL type_denoter semicolon
 	{
 		char *str = malloc(strlen($1) + strlen($3)+10);
-		sprintf(str, "var %s = %s;", $1, $3);
+		sprintf(str, "var %s = %s;\n", $1, $3);
 		$$ = str;
 	}
 	;
@@ -435,24 +440,40 @@ new_pointer_type : UPARROW domain_type
 domain_type : identifier ;
 
 variable_declaration_part : VAR variable_declaration_list semicolon
-	| {$$ = NULL;}
+	{$$ = $2;}
+	| {$$ = "";}
 	;
 
 variable_declaration_list :
 	  variable_declaration_list semicolon variable_declaration
+	{
+		char *str = malloc(strlen($1)+strlen($3)+4);
+		sprintf(str, "%s%s", $1, $3);
+		$$ = str;
+	}
 	| variable_declaration
 	;
 
 variable_declaration : identifier_list COLON type_denoter
+	{
+		char *str = malloc(strlen($1)+strlen($3)+20);
+		sprintf(str, "var %s;\n", $1);
+		$$ = str;
+	}
 	;
 
 procedure_and_function_declaration_part :
 	 proc_or_func_declaration_list semicolon
-	| {$$ = NULL;}
+	| {$$ = "";}
 	;
 
 proc_or_func_declaration_list :
 	  proc_or_func_declaration_list semicolon proc_or_func_declaration
+	{
+		char *str = malloc(strlen($1)+strlen($3)+5);
+		sprintf(str, "%s%s", $1, $3);
+		$$ = str;
+	}
 	| proc_or_func_declaration
 	;
 
@@ -462,6 +483,9 @@ proc_or_func_declaration : procedure_declaration
 
 procedure_declaration : procedure_heading semicolon directive
 	| procedure_heading semicolon procedure_block
+	{
+		$$ = "";
+	}
 	;
 
 procedure_heading : procedure_identification
@@ -515,9 +539,18 @@ function_block : block ;
 
 statement_part : compound_statement ;
 
-compound_statement : PBEGIN statement_sequence END ;
+compound_statement : PBEGIN statement_sequence END 
+	{
+		$$ = $2;
+	}
+	;
 
 statement_sequence : statement_sequence semicolon statement
+	{
+		char *str = malloc(strlen($1) + strlen($3)+10);
+		sprintf(str, "%s%s", $1, $3);
+		$$ = str;
+	}
 	| statement
 	;
 
@@ -526,10 +559,14 @@ statement : open_statement {$$ = "";}
 	;
 
 open_statement : label COLON non_labeled_open_statement
+	{ $$ = $3; }
 	| non_labeled_open_statement
 	;
 
 closed_statement : label COLON non_labeled_closed_statement
+	{
+		$$ = $3;
+	}
 	| non_labeled_closed_statement
 	;
 
@@ -570,21 +607,41 @@ closed_for_statement : FOR control_variable ASSIGNMENT initial_value direction
 	  final_value DO closed_statement
 	;
 
-open_with_statement : WITH record_variable_list DO open_statement
+open_with_statement : WITH record_variable_list DO open_statement /* TODO */
 	;
 
-closed_with_statement : WITH record_variable_list DO closed_statement
+closed_with_statement : WITH record_variable_list DO closed_statement /* TODO */
 	;
 
 open_if_statement : IF boolean_expression THEN statement
+	{
+		char *str = malloc(strlen($2)+strlen($4)+50);
+		sprintf(str, "if(%s) {%s}", $2, $4);
+		$$ = str;
+	}
 	| IF boolean_expression THEN closed_statement ELSE open_statement
+	{
+		char *str = malloc(strlen($2)+strlen($4)+strlen($6)+50);
+		sprintf(str, "if(%s) {%s} else {%s}", $2, $4, $6);
+		$$ = str;
+	}
 	;
 
 closed_if_statement : IF boolean_expression THEN closed_statement
 	  ELSE closed_statement
+	{
+		char *str = malloc(strlen($2)+strlen($4)+strlen($6)+50);
+		sprintf(str, "if(%s) {%s} else {%s}", $2, $4, $6);
+		$$ = str;
+	}
 	;
 
 assignment_statement : variable_access ASSIGNMENT expression
+	{
+		char *str = malloc(strlen($1) + strlen($3)+5);
+		sprintf(str, "%s = %s", $1, $3);
+		$$ = str;
+	}
 	;
 
 variable_access : identifier
@@ -594,24 +651,55 @@ variable_access : identifier
 	;
 
 indexed_variable : variable_access LBRAC index_expression_list RBRAC
+	{
+		char *str = malloc(strlen($1)+strlen($3)+5);
+		sprintf(str, "%s[%s]", $1, $3);
+		$$ = str;
+	}
 	;
 
 index_expression_list : index_expression_list comma index_expression
+	{
+		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+3);
+		sprintf(str, "%s, %s", $1, $3);
+		$$ = str;
+	}
 	| index_expression
 	;
 
 index_expression : expression ;
 
 field_designator : variable_access DOT identifier
+	{
+		char *str = malloc(strlen($1)+strlen($3)+5);
+		sprintf(str, "%s.%s", $1, $3);
+		$$ = str;
+	}
 	;
 
 procedure_statement : variable_access params
+	{
+		char *str = malloc(strlen($1)+strlen($2)+5);
+		sprintf(str, "%s%s", $1, $2);
+		$$ = str;
+	}
 	| variable_access
 	;
 
-params : LPAREN actual_parameter_list RPAREN ;
+params : LPAREN actual_parameter_list RPAREN
+	{
+		char *str = malloc(strlen($2)+3);
+		sprintf(str, "(%s)", $2);
+		$$ = str;
+	}
+	;
 
 actual_parameter_list : actual_parameter_list comma actual_parameter
+	{
+		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+3);
+		sprintf(str, "%s, %s", $1, $3);
+		$$ = str;
+	}
 	| actual_parameter
 	;
 
@@ -621,11 +709,14 @@ actual_parameter_list : actual_parameter_list comma actual_parameter
 	* the grammar, especially since write and writeln aren't reserved
 	*/
 actual_parameter : expression
-	| expression COLON expression
+	| expression COLON expression /* TODO handle this more gracefully */
 	| expression COLON expression COLON expression
 	;
 
 goto_statement : GOTO label
+	{
+		fprintf(stderr, "NO GOTO ALLOWED!\n");
+	}
 	;
 
 case_statement : CASE case_index OF case_list_element_list END

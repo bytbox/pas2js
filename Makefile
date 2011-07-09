@@ -3,6 +3,7 @@ LEX = lex
 YACC = yacc
 YFLAGS = -d -v
 LDFLAGS = -ll
+CFLAGS = -g
 
 all: pas2js
 
