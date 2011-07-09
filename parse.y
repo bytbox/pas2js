@@ -694,9 +694,11 @@ closed_for_statement : FOR control_variable ASSIGNMENT initial_value direction
 ;
 
 open_with_statement : WITH record_variable_list DO open_statement /* TODO */
+	{ $$ = "/* unimplemented WITH here */\n"; }
 	;
 
 closed_with_statement : WITH record_variable_list DO closed_statement /* TODO */
+	{ $$ = "/* unimplemented WITH here */\n"; }
 	;
 
 open_if_statement : IF boolean_expression THEN statement
