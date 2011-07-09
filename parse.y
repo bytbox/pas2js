@@ -205,7 +205,8 @@ constant_list :
 	constant_list constant_definition
 	{ 
 		char *str = malloc(strlen($1)+strlen($2)+5);
-		sprintf(str, "%s\n%s\n", $1, $2);
+		sprintf(str, "%s%s", $1, $2);
+		$$ = str;
 	}
 	| constant_definition
 	;
@@ -213,7 +214,7 @@ constant_list :
 constant_definition : identifier EQUAL cexpression semicolon
 	{
 		char *str = malloc(20+strlen($1)+strlen($3));
-		sprintf(str, "var %s = %s\n", $1, $3);
+		sprintf(str, "var %s = %s;\n", $1, $3);
 		$$ = str;
 	}
 	;
@@ -222,37 +223,77 @@ constant_definition : identifier EQUAL cexpression semicolon
 
 cexpression : csimple_expression
 	| csimple_expression relop csimple_expression
+	{
+		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+2);
+		sprintf(str, "%s%s%s", $1, $2, $3);
+		$$ = str;
+	}
 	;
 
 csimple_expression : cterm
 	| csimple_expression addop cterm
+	{
+		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+2);
+		sprintf(str, "%s%s%s", $1, $2, $3);
+		$$ = str;
+	}
 	;
 
 cterm : cfactor
 	| cterm mulop cfactor
+	{
+		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+2);
+		sprintf(str, "%s%s%s", $1, $2, $3);
+		$$ = str;
+	}
 	;
 
 cfactor : sign cfactor
+	{
+		char *str = malloc(strlen($1) + strlen($2)+2);
+		sprintf(str, "%s%s", $1, $2);
+		$$ = str;
+	}
 	| cexponentiation
 	;
 
 cexponentiation : cprimary
 	| cprimary STARSTAR cexponentiation
+	{
+		char *str = malloc(strlen($1)+strlen($3)+20);
+		sprintf(str, "Math.pow(%s, %s)", $1, $3);
+		$$ = str;
+	}
 	;
 
 cprimary : identifier
 	| LPAREN cexpression RPAREN
+	{
+		char *str = malloc(strlen($2)+5);
+		sprintf(str, "(%s)", $2);
+		$$ = str;
+	}
 	| unsigned_constant
 	| NOT cprimary
+	{
+		char *str = malloc(strlen($2)+5);
+		sprintf(str, "!%s", $2);
+		$$ = str;
+	}
 	;
 
 constant : non_string
 	| sign non_string
+	{
+		char *str = malloc(strlen($1) + strlen($2)+2);
+		sprintf(str, "%s%s", $1, $2);
+		$$ = str;
+	}
 	| CHARACTER_STRING
 	;
 
-sign : PLUS
-	| MINUS
+sign : PLUS { $$ = ""; }
+	| MINUS { $$ = "-"; }
 	;
 
 non_string : DIGSEQ
@@ -261,7 +302,7 @@ non_string : DIGSEQ
 	;
 
 type_definition_part : TYPE type_definition_list
-	| {$$ = NULL;}
+	| {$$ = "";} /* TODO */
 	;
 
 type_definition_list : type_definition_list type_definition
@@ -582,7 +623,7 @@ case_list_element_list : case_list_element_list semicolon case_list_element
 case_list_element : case_constant_list COLON statement
 	;
 
-otherwisepart : OTHERWISE
+otherwisepart : OTHERWISE /* TODO */
 	| OTHERWISE COLON
 	;
 
@@ -591,12 +632,19 @@ control_variable : identifier ;
 initial_value : expression ;
 
 direction : TO
+	{ $$ = "TO"; }
 	| DOWNTO
+	{ $$ = "TO"; }
 	;
 
 final_value : expression ;
 
 record_variable_list : record_variable_list comma variable_access
+	{
+		char *str = malloc(sizeof($1)+sizeof($2)+sizeof($3));
+		sprintf(str, "%s%s %s", $1, $2, $3);
+		$$ = str;
+	}
 	| variable_access
 	;
 
@@ -604,22 +652,47 @@ boolean_expression : expression ;
 
 expression : simple_expression
 	| simple_expression relop simple_expression
+	{
+		char *str = malloc(sizeof($1)+sizeof($2)+sizeof($3));
+		sprintf(str, "%s %s %s", $1, $2, $3);
+		$$ = str;
+	}
 	;
 
 simple_expression : term
 	| simple_expression addop term
+	{
+		char *str = malloc(sizeof($1)+sizeof($2)+sizeof($3));
+		sprintf(str, "%s %s %s", $1, $2, $3);
+		$$ = str;
+	}
 	;
 
 term : factor
 	| term mulop factor
+	{
+		char *str = malloc(sizeof($1)+sizeof($2)+sizeof($3));
+		sprintf(str, "%s %s %s", $1, $2, $3);
+		$$ = str;
+	}
 	;
 
 factor : sign factor
+	{
+		char *str = malloc(5+strlen($2));
+		sprintf(str, "%s%s", $1, $2);
+		$$ = str;
+	}
 	| exponentiation
 	;
 
 exponentiation : primary
 	| primary STARSTAR exponentiation
+	{
+		char *str = malloc(strlen($1)+strlen($3)+10);
+		sprintf(str, "Math.pow(%s, %s)", $1, $3);
+		$$ = str;
+	}
 	;
 
 primary : variable_access
@@ -627,7 +700,17 @@ primary : variable_access
 	| function_designator
 	| set_constructor
 	| LPAREN expression RPAREN
+	{
+		char *str = malloc(strlen($2)+3);
+		sprintf(str, "(%s)", $2);
+		$$ = str;
+	}
 	| NOT primary
+	{
+		char *str = malloc(strlen($2)+3);
+		sprintf(str, "!%s", $2);
+		$$ = str;
+	}
 	;
 
 unsigned_constant : unsigned_number
@@ -642,17 +725,40 @@ unsigned_real : REALNUMBER
 
 /* functions with no params will be handled by plain identifier */
 function_designator : variable_access params
+	{
+		char *str = malloc(strlen($1)+strlen($2)+1);
+		sprintf(str, "%s%s", $1, $2);
+		$$ = str;
+	}
 	;
 
 set_constructor : LBRAC member_designator_list RBRAC
+	{
+		char *str = malloc(strlen($2)+3);
+		sprintf(str, "[%s]", $2);
+		$$ = str;
+	}
 	| LBRAC RBRAC
+	{
+		$$ = "[]";
+	}
 	;
 
 member_designator_list : member_designator_list comma member_designator
+	{
+		char *str = malloc(strlen($1)+strlen($3)+3);
+		sprintf(str, "%s, %s", $1, $3);
+		$$ = str;
+	}
 	| member_designator
 	;
 
 member_designator : member_designator DOTDOT expression
+	{
+		char *str = malloc(strlen($1)+strlen($3)+2);
+		sprintf(str, "%s..%s", $1, $3);
+		$$ = str;
+	}
 	| expression
 	;
 
@@ -679,9 +785,9 @@ relop : EQUAL {$$ = OP_EQUAL;}
 
 identifier : IDENTIFIER
 
-semicolon : SEMICOLON { $$ = NULL; }
+semicolon : SEMICOLON { $$ = ";"; }
 	;
 
-comma : COMMA { $$ = NULL; }
+comma : COMMA { $$ = ","; }
 	;
 
