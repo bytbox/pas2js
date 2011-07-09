@@ -19,8 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "tree.h"
-
 #define NYI fprintf(stderr, "NOT YET IMPLEMENTED at %s:%d\n", __FILE__, __LINE__); exit(1)
 
 extern int line_no;
