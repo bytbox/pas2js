@@ -482,21 +482,42 @@ proc_or_func_declaration : procedure_declaration
 	;
 
 procedure_declaration : procedure_heading semicolon directive
-	| procedure_heading semicolon procedure_block
 	{
 		$$ = "";
+	}
+	| procedure_heading semicolon procedure_block
+	{
+		char *str = malloc(strlen($1) + strlen($3) + 50);
+		sprintf(str, "%s {%s}\n", $1, $3);
+		$$ = str;
 	}
 	;
 
 procedure_heading : procedure_identification
+	{
+		char *str = malloc(strlen($1)+50);
+		sprintf(str, "function %s()", $1);
+		$$ = str;
+	}
 	| procedure_identification formal_parameter_list
+	{
+		char *str = malloc(strlen($1)+strlen($2)+50);
+		sprintf(str, "function %s%s", $1, $2);
+		$$ = str;
+	}
 	;
 
 directive : FORWARD
 	| EXTERNAL
 	;
 
-formal_parameter_list : LPAREN formal_parameter_section_list RPAREN ;
+formal_parameter_list : LPAREN formal_parameter_section_list RPAREN
+	{
+		char *str = malloc(strlen($2) + 5);
+		sprintf(str, "(%s)", $2);
+		$$ = str;
+	}
+	;
 
 formal_parameter_section_list : formal_parameter_section_list semicolon formal_parameter_section
 	| formal_parameter_section
@@ -548,14 +569,14 @@ compound_statement : PBEGIN statement_sequence END
 statement_sequence : statement_sequence semicolon statement
 	{
 		char *str = malloc(strlen($1) + strlen($3)+10);
-		sprintf(str, "%s%s", $1, $3);
+		sprintf(str, "%s;\n%s", $1, $3);
 		$$ = str;
 	}
 	| statement
 	;
 
-statement : open_statement {$$ = "";}
-	| closed_statement { $$ = "";}
+statement : open_statement
+	| closed_statement
 	;
 
 open_statement : label COLON non_labeled_open_statement
@@ -564,9 +585,7 @@ open_statement : label COLON non_labeled_open_statement
 	;
 
 closed_statement : label COLON non_labeled_closed_statement
-	{
-		$$ = $3;
-	}
+	{ $$ = $3; }
 	| non_labeled_closed_statement
 	;
 
@@ -581,7 +600,7 @@ non_labeled_closed_statement : assignment_statement
 	| closed_while_statement
 	| closed_for_statement
 	|
-	{ $$ = NULL; }
+	{ $$ = ""; }
 	;
 
 non_labeled_open_statement : open_with_statement
@@ -591,12 +610,27 @@ non_labeled_open_statement : open_with_statement
 	;
 
 repeat_statement : REPEAT statement_sequence UNTIL boolean_expression
+	{
+		char *str = malloc(strlen($2)+strlen($4)+100);
+		sprintf(str, "do {\n%s} while(!(%s));", $2, $4);
+		$$ = str;
+	}
 	;
 
 open_while_statement : WHILE boolean_expression DO open_statement
+	{
+		char *str = malloc(100+strlen($2)+strlen($4));
+		sprintf(str, "while (%s) {\n%s}\n", $2, $4);
+		$$ = str;
+	}
 	;
 
 closed_while_statement : WHILE boolean_expression DO closed_statement
+	{
+		char *str = malloc(100+strlen($2)+strlen($4));
+		sprintf(str, "while (%s) {\n%s}\n", $2, $4);
+		$$ = str;
+	}
 	;
 
 open_for_statement : FOR control_variable ASSIGNMENT initial_value direction
@@ -722,27 +756,27 @@ goto_statement : GOTO label
 case_statement : CASE case_index OF case_list_element_list END
 	{
 		char *str = malloc(strlen($2)+strlen($4)+50);
-		sprintf(str, "switch(%s) {%s}", $2, $4);
+		sprintf(str, "switch(%s) {%s}\n", $2, $4);
 		$$ = str;
 	}
 	| CASE case_index OF case_list_element_list SEMICOLON END
 	{
 		char *str = malloc(strlen($2)+strlen($4)+50);
-		sprintf(str, "switch(%s) {%s}", $2, $4);
+		sprintf(str, "switch(%s) {%s}\n", $2, $4);
 		$$ = str;
 	}
 	| CASE case_index OF case_list_element_list semicolon
 	  otherwisepart statement END
 	{
 		char *str = malloc(strlen($2)+strlen($4)+strlen($7)+50);
-		sprintf(str, "switch(%s) {%s\ndefault: %s}", $2, $4, $7);
+		sprintf(str, "switch(%s) {%s\ndefault: %s}\n", $2, $4, $7);
 		$$ = str;
 	}
 	| CASE case_index OF case_list_element_list semicolon
 	  otherwisepart statement SEMICOLON END
 	{
 		char *str = malloc(strlen($2)+strlen($4)+strlen($7)+50);
-		sprintf(str, "switch(%s) {%s\ndefault: %s}", $2, $4, $7);
+		sprintf(str, "switch(%s) {%s\ndefault: %s}\n", $2, $4, $7);
 		$$ = str;
 	}
 	;
