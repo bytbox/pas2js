@@ -818,7 +818,7 @@ final_value : expression ;
 
 record_variable_list : record_variable_list comma variable_access
 	{
-		char *str = malloc(sizeof($1)+sizeof($2)+sizeof($3));
+		char *str = malloc(strlen($1)+strlen($2)+strlen($3));
 		sprintf(str, "%s%s %s", $1, $2, $3);
 		$$ = str;
 	}
@@ -830,7 +830,7 @@ boolean_expression : expression ;
 expression : simple_expression
 	| simple_expression relop simple_expression
 	{
-		char *str = malloc(sizeof($1)+sizeof($2)+sizeof($3));
+		char *str = malloc(strlen($1)+strlen($2)+strlen($3));
 		sprintf(str, "%s %s %s", $1, $2, $3);
 		$$ = str;
 	}
@@ -839,7 +839,7 @@ expression : simple_expression
 simple_expression : term
 	| simple_expression addop term
 	{
-		char *str = malloc(sizeof($1)+sizeof($2)+sizeof($3));
+		char *str = malloc(strlen($1)+strlen($2)+strlen($3));
 		sprintf(str, "%s %s %s", $1, $2, $3);
 		$$ = str;
 	}
@@ -848,7 +848,7 @@ simple_expression : term
 term : factor
 	| term mulop factor
 	{
-		char *str = malloc(sizeof($1)+sizeof($2)+sizeof($3));
+		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+4);
 		sprintf(str, "%s %s %s", $1, $2, $3);
 		$$ = str;
 	}
