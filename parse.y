@@ -488,7 +488,7 @@ procedure_declaration : procedure_heading semicolon directive
 	| procedure_heading semicolon procedure_block
 	{
 		char *str = malloc(strlen($1) + strlen($3) + 50);
-		sprintf(str, "%s {%s}\n", $1, $3);
+		sprintf(str, "%s {\n%s}\n", $1, $3);
 		$$ = str;
 	}
 	;
@@ -702,13 +702,13 @@ closed_with_statement : WITH record_variable_list DO closed_statement /* TODO */
 open_if_statement : IF boolean_expression THEN statement
 	{
 		char *str = malloc(strlen($2)+strlen($4)+50);
-		sprintf(str, "if(%s) {%s}", $2, $4);
+		sprintf(str, "if(%s) {\n%s}", $2, $4);
 		$$ = str;
 	}
 	| IF boolean_expression THEN closed_statement ELSE open_statement
 	{
 		char *str = malloc(strlen($2)+strlen($4)+strlen($6)+50);
-		sprintf(str, "if(%s) {%s} else {%s}", $2, $4, $6);
+		sprintf(str, "if(%s) {\n%s} else {\n%s}", $2, $4, $6);
 		$$ = str;
 	}
 	;
@@ -717,7 +717,7 @@ closed_if_statement : IF boolean_expression THEN closed_statement
 	  ELSE closed_statement
 	{
 		char *str = malloc(strlen($2)+strlen($4)+strlen($6)+50);
-		sprintf(str, "if(%s) {%s} else {%s}", $2, $4, $6);
+		sprintf(str, "if(%s) {\n%s} else {\n%s}", $2, $4, $6);
 		$$ = str;
 	}
 	;
