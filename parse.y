@@ -665,11 +665,33 @@ closed_while_statement : WHILE boolean_expression DO closed_statement
 
 open_for_statement : FOR control_variable ASSIGNMENT initial_value direction
 	  final_value DO open_statement
+	{
+		char *str = malloc(100+strlen($2)+strlen($4)+strlen($6)+strlen($8));
+		if (strcmp($5, "DOWNTO")) { // increasing
+			sprintf(str, "for (%s=%s; %s<=%s; %s++) {\n%s}",
+				$2, $4, $2, $6, $2, $8);
+		} else {
+			sprintf(str, "for (%s=%s; %s>=%s; %s--) {\n%s}",
+				$2, $4, $2, $6, $2, $8);
+		}
+		$$ = str;
+	}
 	;
 
 closed_for_statement : FOR control_variable ASSIGNMENT initial_value direction
 	  final_value DO closed_statement
-	;
+	{
+		char *str = malloc(100+strlen($2)+strlen($4)+strlen($6)+strlen($8));
+		if (strcmp($5, "DOWNTO")) { // increasing
+			sprintf(str, "for (%s=%s; %s<=%s; %s++) {\n%s}",
+				$2, $4, $2, $6, $2, $8);
+		} else {
+			sprintf(str, "for (%s=%s; %s>=%s; %s--) {\n%s}",
+				$2, $4, $2, $6, $2, $8);
+		}
+		$$ = str;
+	}
+;
 
 open_with_statement : WITH record_variable_list DO open_statement /* TODO */
 	;
@@ -841,7 +863,7 @@ initial_value : expression ;
 direction : TO
 	{ $$ = "TO"; }
 	| DOWNTO
-	{ $$ = "TO"; }
+	{ $$ = "DOWNTO"; }
 	;
 
 final_value : expression ;
