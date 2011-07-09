@@ -860,7 +860,7 @@ boolean_expression : expression ;
 expression : simple_expression
 	| simple_expression relop simple_expression
 	{
-		char *str = malloc(strlen($1)+strlen($2)+strlen($3));
+		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+4);
 		sprintf(str, "%s %s %s", $1, $2, $3);
 		$$ = str;
 	}
@@ -869,7 +869,7 @@ expression : simple_expression
 simple_expression : term
 	| simple_expression addop term
 	{
-		char *str = malloc(strlen($1)+strlen($2)+strlen($3));
+		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+4);
 		sprintf(str, "%s %s %s", $1, $2, $3);
 		$$ = str;
 	}
@@ -947,7 +947,7 @@ function_designator : variable_access params
 
 set_constructor : LBRAC member_designator_list RBRAC
 	{
-		char *str = malloc(strlen($2)+3);
+		char *str = malloc(strlen($2)+5);
 		sprintf(str, "[%s]", $2);
 		$$ = str;
 	}
