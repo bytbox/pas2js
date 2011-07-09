@@ -770,6 +770,11 @@ procedure_statement : variable_access params
 		$$ = str;
 	}
 	| variable_access
+	{
+		char *str = malloc(strlen($1)+5);
+		sprintf(str, "%s()", $1);
+		$$ = str;
+	}
 	;
 
 params : LPAREN actual_parameter_list RPAREN
