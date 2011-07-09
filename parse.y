@@ -300,14 +300,27 @@ non_string : DIGSEQ
 	;
 
 type_definition_part : TYPE type_definition_list
-	| {$$ = "";} /* TODO */
+	{
+		$$ = $2;
+	}
+	| {$$ = "";}
 	;
 
 type_definition_list : type_definition_list type_definition
+	{
+		char *str = malloc(strlen($1) + strlen($2) + 3);
+		sprintf(str, "%s%s", $1, $2);
+		$$ = str;
+	}
 	| type_definition
 	;
 
 type_definition : identifier EQUAL type_denoter semicolon
+	{
+		char *str = malloc(strlen($1) + strlen($3)+10);
+		sprintf(str, "var %s = %s;", $1, $3);
+		$$ = str;
+	}
 	;
 
 type_denoter : identifier
@@ -324,13 +337,24 @@ new_ordinal_type : enumerated_type
 	;
 
 enumerated_type : LPAREN identifier_list RPAREN
+	{
+		char *str = malloc(strlen($2) + 5);
+		sprintf(str, "(%s)", $2);
+		$$ = str;
+	}
 	;
 
 subrange_type : constant DOTDOT constant
+	{
+		/* TODO */
+	}
 	;
 
 new_structured_type : structured_type
 	| PACKED structured_type
+	{
+		$$ = $2;
+	}
 	;
 
 structured_type : array_type
@@ -497,8 +521,8 @@ statement_sequence : statement_sequence semicolon statement
 	| statement
 	;
 
-statement : open_statement
-	| closed_statement
+statement : open_statement {$$ = "";}
+	| closed_statement { $$ = "";}
 	;
 
 open_statement : label COLON non_labeled_open_statement
@@ -605,23 +629,53 @@ goto_statement : GOTO label
 	;
 
 case_statement : CASE case_index OF case_list_element_list END
+	{
+		char *str = malloc(strlen($2)+strlen($4)+50);
+		sprintf(str, "switch(%s) {%s}", $2, $4);
+		$$ = str;
+	}
 	| CASE case_index OF case_list_element_list SEMICOLON END
+	{
+		char *str = malloc(strlen($2)+strlen($4)+50);
+		sprintf(str, "switch(%s) {%s}", $2, $4);
+		$$ = str;
+	}
 	| CASE case_index OF case_list_element_list semicolon
 	  otherwisepart statement END
+	{
+		char *str = malloc(strlen($2)+strlen($4)+strlen($7)+50);
+		sprintf(str, "switch(%s) {%s\ndefault: %s}", $2, $4, $7);
+		$$ = str;
+	}
 	| CASE case_index OF case_list_element_list semicolon
 	  otherwisepart statement SEMICOLON END
+	{
+		char *str = malloc(strlen($2)+strlen($4)+strlen($7)+50);
+		sprintf(str, "switch(%s) {%s\ndefault: %s}", $2, $4, $7);
+		$$ = str;
+	}
 	;
 
 case_index : expression ;
 
 case_list_element_list : case_list_element_list semicolon case_list_element
+	{
+		char *str = malloc(strlen($1) + strlen($3) + 5);
+		sprintf(str, "%s%s", $1, $3);
+		$$ = str;
+	}
 	| case_list_element
 	;
 
 case_list_element : case_constant_list COLON statement
+	{
+		char *str = malloc(strlen($1) + strlen($3)+30);
+		sprintf(str, "case %s: %s\nbreak;\n", $1, $3);
+		$$ = str;
+	}
 	;
 
-otherwisepart : OTHERWISE /* TODO */
+otherwisepart : OTHERWISE
 	| OTHERWISE COLON
 	;
 
