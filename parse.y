@@ -554,7 +554,7 @@ function_heading : FUNCTION identifier COLON result_type
 
 result_type : identifier ;
 
-function_identification : FUNCTION identifier ;
+function_identification : FUNCTION identifier {$$ = $2;};
 
 function_block : block ;
 

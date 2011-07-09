@@ -84,7 +84,7 @@ NQUOTE	[^']
 [_a-zA-Z]([_a-zA-Z0-9])*	{yylval.string = strdup(yytext); return(IDENTIFIER);}
 
 ":="				return(ASSIGNMENT);
-'({NQUOTE}|'')*'		return(CHARACTER_STRING);
+'({NQUOTE}|'')*'		{yylval.string=strdup(yytext); return(CHARACTER_STRING);}
 ":"				return(COLON);
 ","				return(COMMA);
 "."				return(DOT);
