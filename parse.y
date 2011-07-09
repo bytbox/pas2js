@@ -539,22 +539,52 @@ procedural_parameter_specification : procedure_heading ;
 
 functional_parameter_specification : function_heading ;
 
-procedure_identification : PROCEDURE identifier ;
+procedure_identification : PROCEDURE identifier 
+	{
+		$$ = $2;
+	}
+	;
 
 procedure_block : block ;
 
-function_declaration : function_heading semicolon directive
+function_declaration : function_heading semicolon directive /* TODO */
 	| function_identification semicolon function_block
+	{
+		char *str = malloc(strlen($1)+strlen($3)+20);
+		sprintf(str, "%s {\n%s}\n", $1, $3);
+		$$ = str;
+	}
 	| function_heading semicolon function_block
+	{
+		char *str = malloc(strlen($1)+strlen($3)+20);
+		sprintf(str, "%s {\n%s}\n", $1, $3);
+		$$ = str;
+	}
 	;
 
 function_heading : FUNCTION identifier COLON result_type
+	{
+		char *str = malloc(strlen($2)+20);
+		sprintf(str, "function %s()", $2);
+		$$ = str;
+	}
 	| FUNCTION identifier formal_parameter_list COLON result_type
+	{
+		char *str = malloc(strlen($2)+strlen($3)+20);
+		sprintf(str, "function %s%s", $2, $3);
+		$$ = str;
+	}
 	;
 
 result_type : identifier ;
 
-function_identification : FUNCTION identifier {$$ = $2;};
+function_identification : FUNCTION identifier
+	{
+		char *str = malloc(strlen($2)+20);
+		sprintf(str, "function %s()", $2);
+		$$ = str;
+	}
+	;
 
 function_block : block ;
 
@@ -756,27 +786,27 @@ goto_statement : GOTO label
 case_statement : CASE case_index OF case_list_element_list END
 	{
 		char *str = malloc(strlen($2)+strlen($4)+50);
-		sprintf(str, "switch(%s) {%s}\n", $2, $4);
+		sprintf(str, "switch(%s) {\n%s}\n", $2, $4);
 		$$ = str;
 	}
 	| CASE case_index OF case_list_element_list SEMICOLON END
 	{
 		char *str = malloc(strlen($2)+strlen($4)+50);
-		sprintf(str, "switch(%s) {%s}\n", $2, $4);
+		sprintf(str, "switch(%s) {\n%s}\n", $2, $4);
 		$$ = str;
 	}
 	| CASE case_index OF case_list_element_list semicolon
 	  otherwisepart statement END
 	{
 		char *str = malloc(strlen($2)+strlen($4)+strlen($7)+50);
-		sprintf(str, "switch(%s) {%s\ndefault: %s}\n", $2, $4, $7);
+		sprintf(str, "switch(%s) {\n%s\ndefault: %s}\n", $2, $4, $7);
 		$$ = str;
 	}
 	| CASE case_index OF case_list_element_list semicolon
 	  otherwisepart statement SEMICOLON END
 	{
 		char *str = malloc(strlen($2)+strlen($4)+strlen($7)+50);
-		sprintf(str, "switch(%s) {%s\ndefault: %s}\n", $2, $4, $7);
+		sprintf(str, "switch(%s) {\n%s\ndefault: %s}\n", $2, $4, $7);
 		$$ = str;
 	}
 	;
@@ -898,6 +928,12 @@ unsigned_constant : unsigned_number
 unsigned_number : unsigned_real ;
 
 unsigned_real : REALNUMBER
+	{
+		// remove any leading 0s - pascal lacks octal literals
+		char *n = $1;
+		while (*n == '0' && (*(n+1)) != 0) n++;
+		$$ = n;
+	}
 	;
 
 /* functions with no params will be handled by plain identifier */
