@@ -364,11 +364,15 @@ new_structured_type : structured_type
 
 structured_type : array_type
 	| record_type
-	| set_type
-	| file_type
+	{ $$ = ""; }
+	| set_type { $$ = ""; }
+	| file_type { $$ = ""; }
 	;
 
 array_type : ARRAY LBRAC index_list RBRAC OF component_type
+	{
+		$$ = "Array";
+	}
 	;
 
 index_list : index_list comma index_type
@@ -457,7 +461,10 @@ variable_declaration_list :
 variable_declaration : identifier_list COLON type_denoter
 	{
 		char *str = malloc(strlen($1)+strlen($3)+20);
-		sprintf(str, "var %s;\n", $1);
+		if (strlen($3) > 0)
+			sprintf(str, "var %s = new %s();\n", $1, $3);
+		else
+			sprintf(str, "var %s;\n", $1);
 		$$ = str;
 	}
 	;
