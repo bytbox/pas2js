@@ -181,7 +181,9 @@ module :
 	dparts
 	procedure_and_function_declaration_part
 	{
-		NYI;
+		char *str = malloc(strlen($1)+strlen($2)+10);
+		sprintf(str, "%s\n%s\n", $1, $2);
+		$$ = str;
 	}
 	;
 
