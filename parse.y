@@ -694,11 +694,19 @@ closed_for_statement : FOR control_variable ASSIGNMENT initial_value direction
 ;
 
 open_with_statement : WITH record_variable_list DO open_statement /* TODO */
-	{ $$ = "/* unimplemented WITH here */\n"; }
+	{
+		char *str = malloc(strlen($2)+strlen($4)+16);
+		sprintf(str, "with (%s) {\n%s}\n", $2, $4);
+		$$ = str;
+	}
 	;
 
 closed_with_statement : WITH record_variable_list DO closed_statement /* TODO */
-	{ $$ = "/* unimplemented WITH here */\n"; }
+	{
+		char *str = malloc(strlen($2)+strlen($4)+16);
+		sprintf(str, "with (%s) {\n%s}\n", $2, $4);
+		$$ = str;
+	}
 	;
 
 open_if_statement : IF boolean_expression THEN statement
