@@ -1034,6 +1034,16 @@ relop : EQUAL {$$ = OP_EQUAL;}
 	;
 
 identifier : IDENTIFIER
+	{
+		char *str = $1;
+		char *c = str;
+		while (*c != 0) {
+			if (*c >= 'a' && *c <= 'z')
+				*c -= ('a'-'A');
+			c++;
+		}
+		$$ = str;
+	}
 
 semicolon : SEMICOLON { $$ = ";"; }
 	;
