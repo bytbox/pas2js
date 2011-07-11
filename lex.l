@@ -59,6 +59,7 @@ NQUOTE	[^']
 {G}{O}{T}{O}			return(GOTO);
 {I}{F}				return(IF);
 {I}{N}				return(IN);
+{I}{N}{T}{E}{R}{F}{A}{C}{E}	/* Do absolutely nothing */
 {L}{A}{B}{E}{L}			return(LABEL);
 {M}{O}{D}			return(MOD);
 {N}{I}{L}			return(NIL);
@@ -77,6 +78,8 @@ NQUOTE	[^']
 {T}{H}{E}{N}			return(THEN);
 {T}{O}				return(TO);
 {T}{Y}{P}{E}			return(TYPE);
+{U}{N}{I}{T}			return(UNIT);
+{U}{S}{E}{S}			return(USES);
 {U}{N}{T}{I}{L}			return(UNTIL);
 {V}{A}{R}			return(VAR);
 {W}{H}{I}{L}{E}			return(WHILE);

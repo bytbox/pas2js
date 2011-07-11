@@ -115,7 +115,7 @@ void yyerror() {
 %token <string> GE GOTO GT IDENTIFIER IF IN LABEL LBRAC LE LPAREN LT MINUS MOD NIL NOT
 %token <string> NOTEQUAL OF OR OTHERWISE PACKED PBEGIN PFILE PLUS PROCEDURE PROGRAM RBRAC
 %token <string> REALNUMBER RECORD REPEAT RPAREN SEMICOLON SET SLASH STAR STARSTAR THEN
-%token <string> TO TYPE UNTIL UPARROW VAR WHILE WITH
+%token <string> TO TYPE UNIT UNTIL UPARROW USES VAR WHILE WITH
 
 %%
 file : program
@@ -167,24 +167,58 @@ block : label_declaration_part
 	;
 
 dparts :
-	constant_definition_part
-	type_definition_part
-	variable_declaration_part
+	{ $$ = ""; }
+	|
+	dparts constant_definition_part
 	{
+		char *str = malloc(strlen($1)+strlen($2)+10);
+		sprintf(str, "%s%s", $1, $2);
+		$$ = str;
+	}
+	|
+	dparts type_definition_part
+	{
+		char *str = malloc(strlen($1)+strlen($2)+10);
+		sprintf(str, "%s%s", $1, $2);
+		$$ = str;
+	}
+	|
+	dparts variable_declaration_part
+	{
+		char *str = malloc(strlen($1)+strlen($2)+10);
+		sprintf(str, "%s%s", $1, $2);
+		$$ = str;
+	}
+	/*	{
 		char *str = malloc(strlen($1)+strlen($2)+strlen($3)+10);
 		sprintf(str, "%s%s%s", $1, $2, $3);
+		$$ = str;
+	} */
+	;
+
+module :
+	ignored	
+	dparts
+	procedure_and_function_declaration_part
+	{
+		char *str = malloc(strlen($2)+strlen($3)+10);
+		sprintf(str, "%s\n%s\n", $2, $3);
 		$$ = str;
 	}
 	;
 
-module :
-	dparts
-	procedure_and_function_declaration_part
-	{
-		char *str = malloc(strlen($1)+strlen($2)+10);
-		sprintf(str, "%s\n%s\n", $1, $2);
-		$$ = str;
-	}
+ignored :
+	|
+	ignored unit
+	|
+	ignored uses
+
+unit :
+	UNIT identifier semicolon
+	;
+
+uses :
+	USES identifier_list semicolon
 	;
 
 label_declaration_part :
@@ -203,7 +237,6 @@ label : DIGSEQ
 
 constant_definition_part : CONST constant_list
 	{ $$ = $2; }
-	| {$$ = "";}
 	;
 
 constant_list :
@@ -306,11 +339,11 @@ non_string : DIGSEQ
 	| REALNUMBER
 	;
 
-type_definition_part : TYPE type_definition_list
+type_definition_part : 
+	TYPE type_definition_list
 	{
 		$$ = $2;
 	}
-	| {$$ = "";}
 	;
 
 type_definition_list : type_definition_list type_definition
@@ -447,7 +480,6 @@ domain_type : identifier ;
 
 variable_declaration_part : VAR variable_declaration_list semicolon
 	{$$ = $2;}
-	| {$$ = "";}
 	;
 
 variable_declaration_list :
@@ -473,7 +505,7 @@ variable_declaration : identifier_list COLON type_denoter
 
 procedure_and_function_declaration_part :
 	 proc_or_func_declaration_list semicolon
-	| {$$ = "";}
+	| { $$ = ""; }
 	;
 
 proc_or_func_declaration_list :
