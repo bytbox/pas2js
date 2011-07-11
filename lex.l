@@ -103,6 +103,7 @@ NQUOTE	[^']
 "<>"				return(NOTEQUAL);
 "+"				return(PLUS);
 "]"				return(RBRAC);
+"$"[0-9A-Fa-f]+			{puts(yytext); yylval.string = strdup(yytext); return(HEXNUMBER);}
 [0-9]+("."[0-9]+)?([eE]-?[0-9]+)?	{yylval.string = strdup(yytext); return(REALNUMBER);}
 ")"				return(RPAREN);
 ";"				return(SEMICOLON);

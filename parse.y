@@ -109,13 +109,14 @@ void yyerror() {
 %type <string> function_designator set_constructor member_designator_list member_designator
 %type <string> identifier semicolon comma 
 %type <string> addop mulop relop
+%type <string> constant_type
 
 %token <string> AND ARRAY ASSIGNMENT CASE CHARACTER_STRING COLON COMMA CONST DIGSEQ
 %token <string> DIV DO DOT DOTDOT DOWNTO ELSE END EQUAL EXTERNAL FOR FORWARD FUNCTION
 %token <string> GE GOTO GT IDENTIFIER IF IN LABEL LBRAC LE LPAREN LT MINUS MOD NIL NOT
 %token <string> NOTEQUAL OF OR OTHERWISE PACKED PBEGIN PFILE PLUS PROCEDURE PROGRAM RBRAC
 %token <string> REALNUMBER RECORD REPEAT RPAREN SEMICOLON SET SLASH STAR STARSTAR THEN
-%token <string> TO TYPE UNIT UNTIL UPARROW USES VAR WHILE WITH
+%token <string> TO TYPE UNIT UNTIL UPARROW USES VAR WHILE WITH HEXNUMBER
 
 %%
 file : program
@@ -255,6 +256,17 @@ constant_definition : identifier EQUAL cexpression semicolon
 		sprintf(str, "var %s = %s;\n", $1, $3);
 		$$ = str;
 	}
+	|
+	identifier constant_type EQUAL cexpression semicolon
+	{
+		char *str = malloc(20+strlen($1)+strlen($4));
+		sprintf(str, "var %s = %s;\n", $1, $4);
+		$$ = str;
+	}
+	;
+
+constant_type : COLON type_denoter
+	{ $$ = ""; }
 	;
 
 /*constant : cexpression ;  /* good stuff! */
@@ -337,6 +349,13 @@ sign : PLUS { $$ = ""; }
 non_string : DIGSEQ
 	| identifier
 	| REALNUMBER
+	| HEXNUMBER
+	{
+		puts("HEX FOUND");
+		char *str = malloc(strlen($1)+5);
+		sprintf(str, "0x%s", $1 + 1);
+		$$ = str;
+	}
 	;
 
 type_definition_part : 
@@ -399,7 +418,6 @@ new_structured_type : structured_type
 
 structured_type : array_type
 	| record_type
-	{ $$ = ""; }
 	| set_type { $$ = ""; }
 	| file_type { $$ = ""; }
 	;
@@ -423,8 +441,11 @@ ordinal_type : new_ordinal_type
 component_type : type_denoter ;
 
 record_type : RECORD record_section_list END
+	{ $$ = "Object"; }
 	| RECORD record_section_list semicolon variant_part END
+	{ $$ = "Object"; }
 	| RECORD variant_part END
+	{ $$ = "Object"; }
 	;
 
 record_section_list : record_section_list semicolon record_section
