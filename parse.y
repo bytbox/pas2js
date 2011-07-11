@@ -351,7 +351,6 @@ non_string : DIGSEQ
 	| REALNUMBER
 	| HEXNUMBER
 	{
-		puts("HEX FOUND");
 		char *str = malloc(strlen($1)+5);
 		sprintf(str, "0x%s", $1 + 1);
 		$$ = str;
