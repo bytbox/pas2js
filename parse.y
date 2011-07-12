@@ -108,8 +108,8 @@ void yyerror() {
 %type <string> primary unsigned_constant unsigned_number unsigned_real
 %type <string> function_designator set_constructor member_designator_list member_designator
 %type <string> identifier semicolon comma 
-%type <string> addop mulop relop
-%type <string> constant_type
+%type <string> addop mulop relop crecord_literal crecord_entry_list crecord_entry
+%type <string> constant_type carray_literal cexpression_list hexnum
 
 %token <string> AND ARRAY ASSIGNMENT CASE CHARACTER_STRING COLON COMMA CONST DIGSEQ
 %token <string> DIV DO DOT DOTDOT DOWNTO ELSE END EQUAL EXTERNAL FOR FORWARD FUNCTION
@@ -287,7 +287,32 @@ csimple_expression : cterm
 		sprintf(str, "%s%s%s", $1, $2, $3);
 		$$ = str;
 	}
+	| carray_literal
+	| crecord_literal
 	;
+
+crecord_literal : LPAREN crecord_entry_list RPAREN
+	{
+		char *str = malloc(strlen($2)+50);
+		sprintf(str, "{\n%s\n}", $2);
+		$$ = str;
+	}
+
+crecord_entry_list : crecord_entry_list semicolon crecord_entry
+	{
+		char *str = malloc(strlen($1) + strlen($3)+10);
+		sprintf(str, "%s,\n%s", $1, $3);
+		$$ = str;
+	}
+	|
+	crecord_entry
+
+crecord_entry : identifier COLON cexpression
+	{
+		char *str = malloc(strlen($1)+strlen($3)+10);
+		sprintf(str, "%s : %s", $1, $3);
+		$$ = str;
+	}
 
 cterm : cfactor
 	| cterm mulop cfactor
@@ -349,13 +374,15 @@ sign : PLUS { $$ = ""; }
 non_string : DIGSEQ
 	| identifier
 	| REALNUMBER
-	| HEXNUMBER
+	| hexnum
+	;
+
+hexnum : HEXNUMBER
 	{
 		char *str = malloc(strlen($1)+5);
 		sprintf(str, "0x%s", $1 + 1);
 		$$ = str;
 	}
-	;
 
 type_definition_part : 
 	TYPE type_definition_list
@@ -964,6 +991,21 @@ expression : simple_expression
 	}
 	;
 
+carray_literal : LPAREN cexpression_list RPAREN
+	{
+		char *str = malloc(strlen($2)+20);
+		sprintf(str, "new Array(%s)", $2);
+		$$ = str;
+	}
+
+cexpression_list : cexpression_list comma cexpression
+	{
+		char *str = malloc(strlen($1)+strlen($3)+5);
+		sprintf(str, "%s, %s", $1, $3);
+		$$ = str;
+	}
+	| cexpression
+
 simple_expression : term
 	| simple_expression addop term
 	{
@@ -1023,7 +1065,7 @@ unsigned_constant : unsigned_number
 	| NIL
 	;
 
-unsigned_number : unsigned_real ;
+unsigned_number : unsigned_real | hexnum ;
 
 unsigned_real : REALNUMBER
 	{
