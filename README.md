@@ -18,6 +18,11 @@ equivalents of various pascal functions.
 Known Bugs
 ----------
 
+First note that this code is a) outdated and b) written for a different dialect
+of pascal than you're using, written by a programmer who doesn't have your
+habits. Don't assume that it will do anything but barf when you feed it your
+own code. Listed below are some known and important bugs.
+
  * Types aren't handled quite correctly. (Specifically, they are mostly
    ignored.)
 
