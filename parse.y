@@ -608,6 +608,11 @@ formal_parameter_list : LPAREN formal_parameter_section_list RPAREN
 	;
 
 formal_parameter_section_list : formal_parameter_section_list semicolon formal_parameter_section
+	{
+		char *str = malloc(strlen($1) + strlen($3) + 4);
+		sprintf(str, "%s, %s", $1, $3);
+		$$ = str;
+	}
 	| formal_parameter_section
 	;
 
